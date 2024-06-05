@@ -1,1 +1,1 @@
-from .serializer import Serializer
+from .serializer import SkeletonSerializer

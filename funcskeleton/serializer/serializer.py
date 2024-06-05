@@ -1,4 +1,4 @@
-class Serializer(object):
+class SkeletonSerializer(object):
     @staticmethod
     def serialize_function(function_dict, nparams=None):
         ret, blocks = '', function_dict['blocks']
@@ -28,9 +28,9 @@ class Serializer(object):
 
         if nparams:
             for func, params in zip(function_dicts, nparams):
-                ret.append(Serializer.serialize_function(func, params))
+                ret.append(SkeletonSerializer.serialize_function(func, params))
         else:
             for func in function_dicts:
-                ret.append(Serializer.serialize_function(func))
+                ret.append(SkeletonSerializer.serialize_function(func))
 
         return ret

@@ -4,7 +4,7 @@ import ast
 
 from ..cfg import Graph
 
-class Encoder(object):
+class SkeletonEncoder(object):
 
     @staticmethod
     def dicts_from_sources(srclist:list, verbose=False):
@@ -23,10 +23,10 @@ class Encoder(object):
 
     @staticmethod
     def dicts_from_sources_parallel(srclist:list, n_processes=4, verbose=False):
-        buckets = Encoder.__split_buckets(srclist, n_processes)
+        buckets = SkeletonEncoder.__split_buckets(srclist, n_processes)
 
         with concurrent.futures.ProcessPoolExecutor() as e:
-            futures = [e.submit(Encoder.dicts_from_sources, b, verbose) 
+            futures = [e.submit(SkeletonEncoder.dicts_from_sources, b, verbose) 
                         for b in buckets]
             
         result = []
@@ -36,17 +36,17 @@ class Encoder(object):
 
     @staticmethod
     def dicts_from_single_functions(functions:list, verbose=False):
-        functions = Encoder.__functions_sanity_check(functions)
+        functions = SkeletonEncoder.__functions_sanity_check(functions)
 
-        result = Encoder.dicts_from_sources(functions, verbose)
+        result = SkeletonEncoder.dicts_from_sources(functions, verbose)
         return [_['functions'][0] for _ in result]
 
     @staticmethod
     def dicts_from_single_functions_parallel(functions:list, n_processes, verbose=False):
-        buckets = Encoder.__split_buckets(functions, n_processes)
+        buckets = SkeletonEncoder.__split_buckets(functions, n_processes)
 
         with concurrent.futures.ProcessPoolExecutor() as e:
-            futures = [e.submit(Encoder.dicts_from_single_functions, b, verbose) 
+            futures = [e.submit(SkeletonEncoder.dicts_from_single_functions, b, verbose) 
                         for b in buckets]
             
         result = []
@@ -62,14 +62,14 @@ class Encoder(object):
             with open(file) as f: src = f.read()
             srclist.append(src)
         
-        return Encoder.dicts_from_sources(srclist, verbose)
+        return SkeletonEncoder.dicts_from_sources(srclist, verbose)
 
     @staticmethod
     def dicts_from_files_parallel(files:list, n_processes=1, verbose=False):
-        buckets = Encoder.__split_buckets(files, n_processes)
+        buckets = SkeletonEncoder.__split_buckets(files, n_processes)
 
         with concurrent.futures.ProcessPoolExecutor() as e:
-            futures = [e.submit(Encoder.dicts_from_files, b, verbose) 
+            futures = [e.submit(SkeletonEncoder.dicts_from_files, b, verbose) 
                         for b in buckets]
             
         result = []
@@ -85,7 +85,7 @@ class Encoder(object):
             with open(file) as f: src = f.read()
             srclist.append(src)
         
-        return Encoder.dicts_from_single_functions(srclist, verbose)
+        return SkeletonEncoder.dicts_from_single_functions(srclist, verbose)
 
     @staticmethod
     def dicts_from_files_of_single_functions_parallel(files:list, n_processes, verbose=False):
@@ -95,7 +95,7 @@ class Encoder(object):
             with open(file) as f: src = f.read()
             srclist.append(src)
         
-        return Encoder.dicts_from_single_functions_parallel(srclist, n_processes, verbose)
+        return SkeletonEncoder.dicts_from_single_functions_parallel(srclist, n_processes, verbose)
 
 
     @staticmethod
@@ -123,7 +123,7 @@ class Encoder(object):
         ret = []
         removed = 0
         for function in functions:
-            if Encoder.__function_sanity_check(function):
+            if SkeletonEncoder.__function_sanity_check(function):
                 ret.append(function)
             else: removed += 1
 

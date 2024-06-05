@@ -32,7 +32,7 @@ TODO:
 
 ## *Example:*
 ```python
-import funcskeleton as fs
+import funcskeleton as fsk
 
 src1 = """
 def function1(param):
@@ -58,11 +58,11 @@ def function2(param):
     return param
 """
 
-control_flow_dicts = fs.Encoder.from_single_functions(
+control_flow_dicts = fsk.SkeletonEncoder.from_single_functions(
     functions=[src1, src2], 
 ) 
 
-serialized = fs.Serializer.serialize_functions(control_flow_dicts)
+serialized = fsk.SkeletonSerializer.serialize_functions(control_flow_dicts)
 
 for s in serialized: print(s)
 

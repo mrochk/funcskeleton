@@ -1,7 +1,7 @@
 # FuncSkeleton
 Generates the "skeleton" of a function for Machine Learning purposes.
 
-Example:
+## *Example:*
 ```python
 import funcskeleton as fs
 

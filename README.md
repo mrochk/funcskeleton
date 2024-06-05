@@ -58,7 +58,7 @@ def function2(param):
     return param
 """
 
-control_flow_dicts = fs.Encoder.dicts_from_single_functions(
+control_flow_dicts = fs.Encoder.from_single_functions(
     functions=[src1, src2], 
 ) 
 

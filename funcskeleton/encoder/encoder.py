@@ -1,5 +1,6 @@
 import concurrent.futures
 import multiprocessing
+import ast
 
 from ..cfg import Graph
 
@@ -35,6 +36,8 @@ class Encoder(object):
 
     @staticmethod
     def dicts_from_single_functions(functions:list, verbose=False):
+        functions = Encoder.__functions_sanity_check(functions)
+
         result = Encoder.dicts_from_sources(functions, verbose)
         return [_['functions'][0] for _ in result]
 
@@ -104,3 +107,26 @@ class Encoder(object):
             buckets[index].append(src)
 
         return buckets
+
+    @staticmethod
+    def __function_sanity_check(function):
+        """
+        Check if function does not contain nested functions or classes.
+        """
+        return function.count('def ') == 1 and function.count('class ') == 0
+
+    @staticmethod
+    def __functions_sanity_check(functions):
+        """
+        Check if function does not contain nested functions or classes.
+        """
+        ret = []
+        removed = 0
+        for function in functions:
+            if Encoder.__function_sanity_check(function):
+                ret.append(function)
+            else: removed += 1
+
+        print(f'Sanity Check: removed {removed} functions.', flush=True)
+
+        return ret

@@ -1,6 +1,9 @@
 # FuncSkeleton
 Generates the "skeleton" of a function for Machine Learning purposes.
 
+**This program does not support functions containing nested classes or functions.**\
+**It will simply skip them.**
+
 TODO: 
 - [ ] Add comments & write documentation.
 

@@ -1,6 +1,29 @@
 # FuncSkeleton
 Generates the "skeleton" of a function for Machine Learning purposes.
 
+That is, for a given python (file | piece of source code) it will generate a dictionary in the form: 
+```
+functions: [
+    {
+        function1_identifier: ...,
+        function1_containing_class: ...,
+        function1_blocks: [
+            {
+                function1_block1_identifier: ...
+                function1_block1_control_flow: ...
+                function1_block1_relations: ...
+                function1_block1_number_of_calls: ...
+            }, ...
+            
+        ]
+    }, ...
+]
+
+```
+Where the *blocks*, similarly as in a Control Flow Graph, give informations regarding each function flow of execution.
+
+This dictionary representation is what I call the list of *skeletons* of each function in the file.
+
 **This program does not support functions containing nested classes or functions.**\
 **It will simply skip them.**
 

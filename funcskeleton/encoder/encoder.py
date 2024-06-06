@@ -36,7 +36,7 @@ class SkeletonEncoder(ABC):
             if verbose: 
                 count = i + 1
                 percentage = count * 100 / total
-                print(process, f'{count}/{total} | {percentage}%', flush=True)
+                print(process, f'{count}/{total} | {percentage:.1f}%', flush=True)
 
             # TODO: Handle errors.
             try: G = SkeletonEncoder.__get_cfg_timeout(src)

@@ -54,7 +54,8 @@ class Block(object):
 
     @staticmethod
     def __isctrlflow(stmt : ast.AST):
-        t = (ast.If, ast.For, ast.While, ast.Return)
+        t = (ast.If, ast.For, ast.While, ast.Return, 
+             ast.Try, ast.Break, ast.Pass)
         return isinstance(stmt, t)
         
     def calls_to_identifiers(self):

@@ -15,7 +15,7 @@ class SkeletonEncoder(ABC):
     def from_sources(srclist:list, verbose:bool=False) -> list[dict]:
         """
         Takes a list of string of Python source code and returns a list 
-        containing their respective CFGs as a dictionary. 
+        containing pairs of (src, their respective CFGs as a dictionary). 
         """
         process = mp.current_process().name.replace('Fork', '')
         N = len(srclist)
@@ -25,7 +25,7 @@ class SkeletonEncoder(ABC):
         for i, src in enumerate(srclist): 
             if verbose: print(process, f'{i+1}/{N}', flush=True)
 
-            result.append(Graph(src).to_dict())
+            result.append((src, Graph(src).to_dict()))
 
         return result
 
@@ -62,7 +62,8 @@ class SkeletonEncoder(ABC):
             print(f'{len(not_ok)} functions not processed', flush=True)
 
         result = SkeletonEncoder.from_sources(ok, verbose)
-        return [_['functions'][0] for _ in result]
+        # (function src, function cfg)
+        return [(_[0], _[1]['functions'][0]) for _ in result]
 
     @staticmethod
     def from_single_functions_parallel(

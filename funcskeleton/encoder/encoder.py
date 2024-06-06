@@ -1,11 +1,14 @@
 from abc import ABC
 import concurrent.futures
 import multiprocessing as mp
-from ..util import *
+import timeout_decorator
 
 from ..cfg import Graph, ScalpelError
+from ..util import *
 
 N_PROCESSES_DEFAULT = 4
+
+TIMEOUT_LIMIT_DEFAULT = 30 #seconds
 
 class SkeletonEncoder(ABC):
     """
@@ -23,26 +26,38 @@ class SkeletonEncoder(ABC):
         
         result = []
 
-        scalpel_errors = syntax_errors = 0 
+        scalpel_errors = syntax_errors = timeout_errors = assertion_errors = 0 
 
         for i, src in enumerate(srclist): 
             if verbose: print(process, f'{i+1}/{N}', flush=True)
 
             # TODO: Handle errors.
-            try: G = Graph(src)
+            try: 
+                G = SkeletonEncoder.__get_cfg(src)
             except SyntaxError: 
                 syntax_errors += 1
                 continue
             except ScalpelError: 
                 scalpel_errors += 1
                 continue
+            except TimeoutError: 
+                timeout_errors += 1
+                continue
+            except AssertionError:
+                assertion_errors += 1
+                continue
 
             result.append((src, G.to_dict()))
 
         if verbose:
-            log_error(f'Syntax  errors: {syntax_errors}.')
-            log_error(f'Scalpel errors: {scalpel_errors}.')
-            log_error(f'Total: {syntax_errors + scalpel_errors}.')
+            errors = [syntax_errors, scalpel_errors, 
+                 timeout_errors, assertion_errors,]
+
+            log_error(f'Syntax    errors: {errors[0]}.')
+            log_error(f'Scalpel   errors: {errors[1]}.')
+            log_error(f'Timeout   errors: {errors[2]}.')
+            log_error(f'Assertion errors: {errors[3]}.')
+            log_error(f'Total: {sum(errors)}.')
 
         return result
 
@@ -204,3 +219,6 @@ class SkeletonEncoder(ABC):
             else: can_not_process.append(function)
 
         return can_process, can_not_process
+
+    @timeout_decorator.timeout(TIMEOUT_LIMIT_DEFAULT)
+    def __get_cfg(src): return Graph(src)

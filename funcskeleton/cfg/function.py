@@ -39,6 +39,8 @@ class Function(object):
     def __prune_calls(self, block : Block, callers=set()):
         """
         Delete redundant parent nodes func calls.
+        TODO: This function is the bottleneck of this project, 
+              it must (no doubt that its possible) be optimized.
         """
         calls_before = block.calls_ast.copy()
 

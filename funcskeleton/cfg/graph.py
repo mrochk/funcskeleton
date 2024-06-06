@@ -7,6 +7,9 @@ class Graph(object):
 
     def __init__(self, src):
 
+        try: ast.parse(src)
+        except SyntaxError: raise SyntaxError
+
         self.functions = []
 
         classes = self.__classes(src)

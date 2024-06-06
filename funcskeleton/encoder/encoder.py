@@ -1,8 +1,9 @@
 from abc import ABC
 import concurrent.futures
 import multiprocessing as mp
+from ..util import *
 
-from ..cfg import Graph
+from ..cfg import Graph, ScalpelError
 
 N_PROCESSES_DEFAULT = 4
 
@@ -22,10 +23,26 @@ class SkeletonEncoder(ABC):
         
         result = []
 
+        scalpel_errors = syntax_errors = 0 
+
         for i, src in enumerate(srclist): 
             if verbose: print(process, f'{i+1}/{N}', flush=True)
 
-            result.append((src, Graph(src).to_dict()))
+            # TODO: Handle errors.
+            try: G = Graph(src)
+            except SyntaxError: 
+                syntax_errors += 1
+                continue
+            except ScalpelError: 
+                scalpel_errors += 1
+                continue
+
+            result.append((src, G.to_dict()))
+
+        if verbose:
+            log_error(f'Syntax  errors: {syntax_errors}.')
+            log_error(f'Scalpel errors: {scalpel_errors}.')
+            log_error(f'Total: {syntax_errors + scalpel_errors}.')
 
         return result
 

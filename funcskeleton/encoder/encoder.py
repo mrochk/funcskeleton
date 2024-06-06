@@ -26,14 +26,13 @@ class SkeletonEncoder(ABC):
         
         result = []
 
-        scalpel_errors = syntax_errors = timeout_errors = assertion_errors = 0 
+        scalpel_errors = syntax_errors = timeout_errors = assertion_errors = other_errors = 0 
 
         for i, src in enumerate(srclist): 
             if verbose: print(process, f'{i+1}/{N}', flush=True)
 
             # TODO: Handle errors.
-            try: 
-                G = SkeletonEncoder.__get_cfg(src)
+            try: G = SkeletonEncoder.__get_cfg_timeout(src)
             except SyntaxError: 
                 syntax_errors += 1
                 continue
@@ -46,8 +45,10 @@ class SkeletonEncoder(ABC):
             except AssertionError:
                 assertion_errors += 1
                 continue
-
-            result.append((src, G.to_dict()))
+            except Exception:
+                other_errors += 1
+                continue
+            finally: result.append((src, G.to_dict()))
 
         if verbose:
             errors = [syntax_errors, scalpel_errors, 
@@ -93,9 +94,16 @@ class SkeletonEncoder(ABC):
         if verbose:
             print(f'{len(not_ok)} functions not processed', flush=True)
 
-        result = SkeletonEncoder.from_sources(ok, verbose)
+        result = []
+
+        src_cfgs = SkeletonEncoder.from_sources(ok, verbose)
+
         # (function src, function cfg)
-        return [(_[0], _[1]['functions'][0]) for _ in result]
+        for src, cfg in src_cfgs:
+            if len(cfg['functions']) == 0: continue
+            else: result.append((src, cfg['functions'][0]))
+
+        return result
 
     @staticmethod
     def from_single_functions_parallel(
@@ -204,6 +212,7 @@ class SkeletonEncoder(ABC):
         not support function containing nested functions or classes. 
         Returns True if function can be processed.
         """
+        # TODO: check ast.FunctionDef exists AND ... 
         return function.count('def ') == 1 and function.count('class ') == 0
 
     @staticmethod
@@ -221,4 +230,4 @@ class SkeletonEncoder(ABC):
         return can_process, can_not_process
 
     @timeout_decorator.timeout(TIMEOUT_LIMIT_DEFAULT)
-    def __get_cfg(src): return Graph(src)
+    def __get_cfg_timeout(src): return Graph(src)

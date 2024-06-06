@@ -12,7 +12,7 @@ TIMEOUT_LIMIT_DEFAULT = 30 #seconds
 
 class SkeletonEncoder(ABC):
     """
-    Abstract class containing methods for converting source code
+    Abstract class implementing methods for converting source code
     to a dictionary representing its Control Flow.
     """
     @staticmethod
@@ -22,7 +22,7 @@ class SkeletonEncoder(ABC):
         containing pairs of (src, their respective CFGs as a dictionary). 
         """
         process = mp.current_process().name.replace('Fork', '')
-        N = len(srclist)
+        total = len(srclist)
         
         result = []
 
@@ -34,8 +34,9 @@ class SkeletonEncoder(ABC):
 
         for i, src in enumerate(srclist): 
             if verbose: 
-                percentage = i+1 * 100 / N
-                print(process, f'{i+1}/{N} | {percentage}%', flush=True)
+                count = i + 1
+                percentage = count * 100 / total
+                print(process, f'{count}/{total} | {percentage}%', flush=True)
 
             # TODO: Handle errors.
             try: G = SkeletonEncoder.__get_cfg_timeout(src)

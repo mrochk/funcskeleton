@@ -1,2 +1,1 @@
-from .funcskeleton import SkeletonEncoder
-from .funcskeleton import SkeletonSerializer
+from .funcskeleton import SkeletonEncoder, SkeletonSerializer

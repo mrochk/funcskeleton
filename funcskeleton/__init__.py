@@ -1,2 +1,1 @@
-from .encoder import SkeletonEncoder
-from .serializer import SkeletonSerializer
+from .encoder import SkeletonEncoder, SkeletonSerializer

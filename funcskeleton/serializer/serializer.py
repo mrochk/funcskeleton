@@ -1,6 +1,18 @@
-class SkeletonSerializer(object):
+from abc import ABC
+
+class SkeletonSerializer(ABC):
+    """
+    Abstract class containing methods for serializing a dictionary
+    produced by SkeletonEncoder (that is, converting it to text).
+    """
     @staticmethod
-    def serialize_function(function_dict, nparams=None):
+    def serialize_function(function_dict:dict, nparams:int=None) -> str:
+        """
+        Takes a function dictionary produced by SkeletonEncoder, and returns a 
+        string in the form: `[n_params_func (if specified)];[ctrl_flow_block1]
+        ...[ctrl_flow_blockN];[relations_block1]...[relations_blockN];
+        [n_calls_block1]...[n_class_blockN]`.
+        """
         ret, blocks = '', function_dict['blocks']
 
         if nparams:
@@ -23,7 +35,11 @@ class SkeletonSerializer(object):
         return ret
 
     @staticmethod
-    def serialize_functions(function_dicts, nparams=None):
+    def serialize_functions(function_dicts:list[dict], nparams:list[int]=None) -> list[str]:
+        """
+        Calls `serialize_function` on a list of function dicts, for `nparams`,
+        it must be a list of integers s.t `nparams[i] == n_params(func_i)`.
+        """
         ret = []
 
         if nparams:

@@ -1,14 +1,23 @@
+from abc import ABC
 import concurrent.futures
-import multiprocessing
+import multiprocessing as mp
 
 from ..cfg import Graph
 
-class SkeletonEncoder(object):
+N_PROCESSES_DEFAULT = 4
 
+class SkeletonEncoder(ABC):
+    """
+    Abstract class containing methods for converting source code
+    to a dictionary representing its Control Flow.
+    """
     @staticmethod
-    def from_sources(srclist:list, verbose=False):
-
-        process = multiprocessing.current_process().name.replace('Fork', '')
+    def from_sources(srclist:list, verbose:bool=False) -> list[dict]:
+        """
+        Takes a list of string of Python source code and returns a list 
+        containing their respective CFGs as a dictionary. 
+        """
+        process = mp.current_process().name.replace('Fork', '')
         N = len(srclist)
         
         result = []
@@ -21,7 +30,13 @@ class SkeletonEncoder(object):
         return result
 
     @staticmethod
-    def from_sources_parallel(srclist:list, n_processes=4, verbose=False):
+    def from_sources_parallel(
+            srclist:list[str], n_processes:int=N_PROCESSES_DEFAULT, 
+            verbose:bool=False
+        ) -> list[dict]:
+        """
+        Same as `from_sources` but using `n_processes` to process the sources.
+        """
         buckets = SkeletonEncoder.__split_buckets(srclist, n_processes)
 
         with concurrent.futures.ProcessPoolExecutor() as e:
@@ -34,14 +49,30 @@ class SkeletonEncoder(object):
 
 
     @staticmethod
-    def from_single_functions(functions:list, verbose=False):
-        functions = SkeletonEncoder.__functions_sanity_check(functions)
+    def from_single_functions(
+            functions:list[str], verbose:bool=False
+        ) -> list[dict]:
+        """
+        Takes a list of string of Python single (non-nested) functions and 
+        returns a list containing their respective CFGs as a dictionary. 
+        """
+        ok, not_ok = SkeletonEncoder.functions_sanity_check(functions)
 
-        result = SkeletonEncoder.from_sources(functions, verbose)
+        if verbose:
+            print(f'{len(not_ok)} functions not processed', flush=True)
+
+        result = SkeletonEncoder.from_sources(ok, verbose)
         return [_['functions'][0] for _ in result]
 
     @staticmethod
-    def from_single_functions_parallel(functions:list, n_processes, verbose=False):
+    def from_single_functions_parallel(
+            functions:list[str], n_processes:int=N_PROCESSES_DEFAULT, 
+            verbose:bool=False
+        ) -> list[dict]:
+        """
+        Same as `from_single_functions` but using `n_processes` to process the 
+        functions.
+        """
         buckets = SkeletonEncoder.__split_buckets(functions, n_processes)
 
         with concurrent.futures.ProcessPoolExecutor() as e:
@@ -54,7 +85,11 @@ class SkeletonEncoder(object):
 
 
     @staticmethod
-    def from_files(files:list, verbose=False):
+    def from_files(files:list[str], verbose:bool=False) -> list[dict]:
+        """
+        Takes a list of filepaths to files containing Python source code and 
+        returns a list containing their respective CFGs as a dictionary. 
+        """
         srclist = []
 
         for file in files:
@@ -64,7 +99,13 @@ class SkeletonEncoder(object):
         return SkeletonEncoder.from_sources(srclist, verbose)
 
     @staticmethod
-    def from_files_parallel(files:list, n_processes=1, verbose=False):
+    def from_files_parallel(
+            files:list[str], n_processes:int=N_PROCESSES_DEFAULT, 
+            verbose:bool=False
+        ) -> list[dict]:
+        """
+        Same as `from_files` but using `n_processes` to process the files.
+        """
         buckets = SkeletonEncoder.__split_buckets(files, n_processes)
 
         with concurrent.futures.ProcessPoolExecutor() as e:
@@ -77,7 +118,14 @@ class SkeletonEncoder(object):
 
 
     @staticmethod
-    def from_files_of_single_functions(files:list, verbose=False):
+    def from_files_of_single_functions(
+            files:list[str], verbose:bool=False
+        ) -> list[dict]:
+        """
+        Takes a list of filepaths to files, each containing a single Python 
+        (non-nested) function and returns a list containing their respective 
+        CFGs as a dictionary. 
+        """
         srclist = []
 
         for file in files:
@@ -87,7 +135,13 @@ class SkeletonEncoder(object):
         return SkeletonEncoder.from_single_functions(srclist, verbose)
 
     @staticmethod
-    def from_files_of_single_functions_parallel(files:list, n_processes, verbose=False):
+    def from_files_of_single_functions_parallel(
+            files:list[str], n_processes:int=4, verbose:bool=False
+        ) -> list[dict]:
+        """
+        Same as `from_files_of_single_functions` but using `n_processes` 
+        to process the files.
+        """
         srclist = []
 
         for file in files:
@@ -98,7 +152,10 @@ class SkeletonEncoder(object):
 
 
     @staticmethod
-    def __split_buckets(list, n_processes):
+    def __split_buckets(list:list[str], n_processes:int):
+        """
+        To distribute work between the different `n_processes`.
+        """
         buckets = [[] for _ in range(n_processes)]
 
         for i, src in enumerate(list):
@@ -108,24 +165,24 @@ class SkeletonEncoder(object):
         return buckets
 
     @staticmethod
-    def __function_sanity_check(function):
+    def function_sanity_check(function:str):
         """
-        Check if function does not contain nested functions or classes.
+        Performs a sanity check for a Python function, since we do 
+        not support function containing nested functions or classes. 
+        Returns True if function can be processed.
         """
         return function.count('def ') == 1 and function.count('class ') == 0
 
     @staticmethod
-    def __functions_sanity_check(functions):
+    def functions_sanity_check(functions:list[str]):
         """
-        Check if function does not contain nested functions or classes.
+        Performs a sanity check for a list of Python functions, returns
+        a tuple (can_process, can_not_process).
         """
-        ret = []
-        removed = 0
+        can_process, can_not_process = [], []
         for function in functions:
-            if SkeletonEncoder.__function_sanity_check(function):
-                ret.append(function)
-            else: removed += 1
+            if SkeletonEncoder.function_sanity_check(function):
+                can_process.append(function)
+            else: can_not_process.append(function)
 
-        print(f'Sanity Check: removed {removed} functions.', flush=True)
-
-        return ret
+        return can_process, can_not_process

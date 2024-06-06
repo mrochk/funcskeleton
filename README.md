@@ -24,15 +24,12 @@ Where the *blocks*, similarly as in a Control Flow Graph, give informations rega
 
 This dictionary representation is what I call the list of *skeletons* of each function in the file.
 
-**This program does not support functions containing nested classes or functions.**\
-**It will simply skip them.**
-
-TODO: 
-- [ ] Add comments & write documentation.
+***This program does not support functions containing nested classes or functions.***\
+***It will simply skip them.***
 
 ## *Example:*
 ```python
-import funcskeleton as fsk
+from funcskeleton import SkeletonEncoder, SkeletonSerializer
 
 src1 = """
 def function1(param):
@@ -58,11 +55,11 @@ def function2(param):
     return param
 """
 
-control_flow_dicts = fsk.SkeletonEncoder.from_single_functions(
+control_flow_dicts = SkeletonEncoder.from_single_functions(
     functions=[src1, src2], 
 ) 
 
-serialized = fsk.SkeletonSerializer.serialize_functions(control_flow_dicts)
+serialized = SkeletonSerializer.serialize_functions(control_flow_dicts)
 
 for s in serialized: print(s)
 

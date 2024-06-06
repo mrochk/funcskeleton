@@ -56,7 +56,7 @@ class SkeletonEncoder(ABC):
 
             log_error(f'Syntax    errors: {errors[0]}.')
             log_error(f'Scalpel   errors: {errors[1]}.')
-            log_error(f'Timeout   errors: {errors[2]}.')
+            log_error(f'Timeout   errors: {errors[2]}.') # TODO: Why always 0 ? 
             log_error(f'Assertion errors: {errors[3]}.')
             log_error(f'Total: {sum(errors)}.')
 
@@ -229,5 +229,5 @@ class SkeletonEncoder(ABC):
 
         return can_process, can_not_process
 
-    @timeout_decorator.timeout(TIMEOUT_LIMIT_DEFAULT)
+    @timeout_decorator.timeout(seconds=TIMEOUT_LIMIT_DEFAULT)
     def __get_cfg_timeout(src): return Graph(src)

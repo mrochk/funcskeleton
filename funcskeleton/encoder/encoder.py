@@ -2,6 +2,7 @@ from abc import ABC
 import concurrent.futures
 import multiprocessing as mp
 import timeout_decorator
+import ast
 
 from ..cfg import Graph, ScalpelError
 from ..util import *
@@ -209,8 +210,20 @@ class SkeletonEncoder(ABC):
         not support function containing nested functions or classes. 
         Returns True if function can be processed.
         """
-        # TODO: check ast.FunctionDef exists AND ... 
-        return function.count('def ') == 1 and function.count('class ') == 0
+
+        try: tree = ast.parse(function)
+        except Exception: return False
+
+        def has_one_FunctionDef(node:ast.AST, count=0):
+            for child in ast.walk(node):
+                if isinstance(child, ast.FunctionDef):
+                    count += 1
+            return count == 1
+
+        C1 = function.count('class ') == 0 # nested classes
+        C2 = has_one_FunctionDef(tree)
+
+        return C1 and C2
 
     @staticmethod
     def functions_sanity_check(functions:list[str]):

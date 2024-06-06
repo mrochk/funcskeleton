@@ -15,7 +15,7 @@ class SkeletonSerializer(ABC):
         """
         ret, blocks = '', function_dict['blocks']
 
-        if nparams:
+        if nparams is not None:
             ret += f'[{nparams}];'
 
         for block in blocks:

@@ -26,29 +26,25 @@ class SkeletonEncoder(ABC):
         
         result = []
 
-        scalpel_errors = syntax_errors = timeout_errors = assertion_errors = other_errors = 0 
+        timeout_errors   = 0 
+        scalpel_errors   = 0 
+        syntax_errors    = 0
+        assertion_errors = 0 
+        other_errors     = 0 
 
         for i, src in enumerate(srclist): 
-            if verbose: print(process, f'{i+1}/{N}', flush=True)
+            if verbose: 
+                percentage = i+1 * 100 / N
+                print(process, f'{i+1}/{N} | {percentage}%', flush=True)
 
             # TODO: Handle errors.
             try: G = SkeletonEncoder.__get_cfg_timeout(src)
-            except SyntaxError: 
-                syntax_errors += 1
-                continue
-            except ScalpelError: 
-                scalpel_errors += 1
-                continue
-            except TimeoutError: 
-                timeout_errors += 1
-                continue
-            except AssertionError:
-                assertion_errors += 1
-                continue
-            except Exception:
-                other_errors += 1
-                continue
-            finally: result.append((src, G.to_dict()))
+            except TimeoutError:   timeout_errors += 1; continue
+            except ScalpelError:   scalpel_errors += 1; continue
+            except SyntaxError:    syntax_errors += 1; continue
+            except AssertionError: assertion_errors += 1; continue
+            except Exception:      other_errors += 1; continue
+            finally:               result.append((src, G.to_dict()))
 
         if verbose:
             errors = [syntax_errors, scalpel_errors, 

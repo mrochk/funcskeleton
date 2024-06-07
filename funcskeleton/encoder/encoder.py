@@ -5,7 +5,7 @@ import timeout_decorator
 import ast
 
 from ..cfg import Graph, ScalpelError
-from ..util import *
+from ..util.util import *
 
 N_PROCESSES_DEFAULT = 4
 
@@ -68,16 +68,11 @@ class SkeletonEncoder(ABC):
         """
         Same as `from_sources` but using `n_processes` to process the sources.
         """
-        buckets = SkeletonEncoder.__split_buckets(srclist, n_processes)
+        f = SkeletonEncoder.from_sources
 
-        with concurrent.futures.ProcessPoolExecutor() as e:
-            futures = [e.submit(SkeletonEncoder.from_sources, b, verbose) 
-                        for b in buckets]
-            
-        result = []
-        for future in futures: result += future.result()
-        return result
-
+        return SkeletonEncoder.__run_parallel(
+            f, srclist, n_processes, verbose
+        )
 
     @staticmethod
     def from_single_functions(
@@ -112,16 +107,11 @@ class SkeletonEncoder(ABC):
         Same as `from_single_functions` but using `n_processes` to process the 
         functions.
         """
-        buckets = SkeletonEncoder.__split_buckets(functions, n_processes)
+        f = SkeletonEncoder.from_single_functions
 
-        with concurrent.futures.ProcessPoolExecutor() as e:
-            futures = [e.submit(SkeletonEncoder.from_single_functions, b, verbose) 
-                        for b in buckets]
-            
-        result = []
-        for future in futures: result += future.result()
-        return result
-
+        return SkeletonEncoder.__run_parallel(
+            f, functions, n_processes, verbose
+        )
 
     @staticmethod
     def from_files(files:list[str], verbose:bool=False) -> list[dict]:
@@ -145,15 +135,11 @@ class SkeletonEncoder(ABC):
         """
         Same as `from_files` but using `n_processes` to process the files.
         """
-        buckets = SkeletonEncoder.__split_buckets(files, n_processes)
+        f = SkeletonEncoder.from_files
 
-        with concurrent.futures.ProcessPoolExecutor() as e:
-            futures = [e.submit(SkeletonEncoder.from_files, b, verbose) 
-                        for b in buckets]
-            
-        result = []
-        for future in futures: result += future.result()
-        return result
+        return SkeletonEncoder.__run_parallel(
+            f, files, n_processes, verbose
+        )
 
 
     @staticmethod
@@ -187,7 +173,8 @@ class SkeletonEncoder(ABC):
             with open(file) as f: src = f.read()
             srclist.append(src)
         
-        return SkeletonEncoder.from_single_functions_parallel(srclist, n_processes, verbose)
+        return SkeletonEncoder.from_single_functions_parallel(
+            srclist, n_processes, verbose)
 
 
     @staticmethod
@@ -241,3 +228,14 @@ class SkeletonEncoder(ABC):
 
     @timeout_decorator.timeout(seconds=TIMEOUT_LIMIT_DEFAULT)
     def __get_cfg_timeout(src): return Graph(src)
+
+    @staticmethod
+    def __run_parallel(f, to_process:list, n_processes:int=4, verbose:bool=False):
+        buckets = SkeletonEncoder.__split_buckets(to_process, n_processes)
+
+        with concurrent.futures.ProcessPoolExecutor() as e:
+            futures = [e.submit(f, b, verbose) for b in buckets]
+            
+        result = []
+        for future in futures: result += future.result()
+        return result

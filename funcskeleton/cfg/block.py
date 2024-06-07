@@ -9,6 +9,8 @@ class Block(object):
         self.control_flow = None
         self.calls = []
 
+        ctrl =[]
+
         self.calls_ast = set()
         ctrlflow_count = 0
         # idk if it is useful or not to iterate through all 
@@ -20,7 +22,11 @@ class Block(object):
 
             if self.__isctrlflow(stmt):
                 self.control_flow = type(stmt).__name__
+                ctrl.append(self.control_flow)
                 ctrlflow_count += 1
+
+        if ctrlflow_count > 1:
+            print(ctrl)
 
         # my assumption is that there is only one possible ctrl flow 
         # statement (if, for, while...) per cfg block
@@ -54,8 +60,12 @@ class Block(object):
 
     @staticmethod
     def __isctrlflow(stmt : ast.AST):
-        t = (ast.If, ast.For, ast.While, ast.Return, 
-             ast.Try, ast.Break, ast.Pass)
+        """
+        Returns True if the ast statement node is control flow statement 
+        (If, For, While, Return, Try, Break), but not `pass` because otherwise 
+        it would allow more than one control flow statement per CFG block. 
+        """
+        t = (ast.If, ast.For, ast.While, ast.Return, ast.Try, ast.Break)
         return isinstance(stmt, t)
         
     def calls_to_identifiers(self):

@@ -5,11 +5,11 @@ import timeout_decorator
 import ast
 
 from ..cfg import Graph, ScalpelError
-from ..util.util import *
+from ..utils.utils import *
 
 N_PROCESSES_DEFAULT = 4
 
-TIMEOUT_LIMIT_DEFAULT = 30 #seconds
+TIMEOUT_LIMIT_DEFAULT = 10 #seconds
 
 class SkeletonEncoder(ABC):
     """
@@ -22,41 +22,31 @@ class SkeletonEncoder(ABC):
         Takes a list of string of Python source code and returns a list 
         containing pairs of (src, their respective CFGs as a dictionary). 
         """
-        process = mp.current_process().name.replace('Fork', '')
-        total = len(srclist)
-        
         result = []
 
-        timeout_errors   = 0 
-        scalpel_errors   = 0 
-        syntax_errors    = 0
-        assertion_errors = 0 
-        other_errors     = 0 
+        process = mp.current_process().name.replace('Fork', '')
+
+        total = len(srclist)
+
+        timeout_errors = scalpel_errors = syntax_errors = 0 
 
         for i, src in enumerate(srclist): 
             if verbose: 
-                count = i + 1
-                percentage = count * 100 / total
+                count = i + 1; percentage = count * 100 / total
                 print(process, f'{count}/{total} | {percentage:.1f}%', flush=True)
 
-            # TODO: Handle errors.
-            try: G = SkeletonEncoder.__get_cfg_timeout(src)
-            except TimeoutError:   timeout_errors += 1  ; continue
-            except ScalpelError:   scalpel_errors += 1  ; continue
-            except SyntaxError:    syntax_errors += 1   ; continue
-            except AssertionError: assertion_errors += 1; continue
-            except Exception:      other_errors += 1    ; continue
-            finally:               result.append((src, G.to_dict()))
+            try:     G = SkeletonEncoder.__get_cfg_timeout(src)
+            except   TimeoutError:   timeout_errors += 1  ; continue
+            except   ScalpelError:   scalpel_errors += 1  ; continue
+            except   SyntaxError :   syntax_errors  += 1  ; continue
+            finally: result.append((src, G.to_dict()))
 
         if verbose:
-            errors = [syntax_errors, scalpel_errors, 
-                 timeout_errors, assertion_errors,]
-
+            errors = [syntax_errors, scalpel_errors, timeout_errors]
             print('\nERRORS SUMMARY:', flush=True)
-            log_error(f'Syntax    errors: {errors[0]}.')
-            log_error(f'Scalpel   errors: {errors[1]}.')
-            log_error(f'Timeout   errors: {errors[2]}.')
-            log_error(f'Assertion errors: {errors[3]}.') # TODO: Where do they come from ?
+            log_error(f'Syntax  errors: {errors[0]}.')
+            log_error(f'Scalpel errors: {errors[1]}.')
+            log_error(f'Timeout errors: {errors[2]}.')
             log_error(f'TOTAL: {sum(errors)} not processed.')
 
         return result

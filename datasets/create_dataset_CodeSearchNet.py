@@ -26,13 +26,13 @@ if __name__ == '__main__':
     print(f'Before(test):  {csn["test"].num_rows}')
     print(f'Before(validation): {csn["validation"].num_rows}')
 
-    csn['train'] = csn['train'].filter(lambda _: sanity_check(_))
+    #csn['train'] = csn['train'].filter(lambda _: sanity_check(_))
     csn['test'] = csn['test'].filter(lambda _: sanity_check(_))
-    csn['validation'] = csn['validation'].filter(lambda _: sanity_check(_))
+    #csn['validation'] = csn['validation'].filter(lambda _: sanity_check(_))
 
-    print(f'After filtering (train): {csn["train"].num_rows}')
+    #print(f'After filtering (train): {csn["train"].num_rows}')
     print(f'After filtering (test): {csn["test"].num_rows}')
-    print(f'After filtering (validation): {csn["validation"].num_rows}')
+    #print(f'After filtering (validation): {csn["validation"].num_rows}')
 
     csn_train, csn_test, csn_val = csn['train'], csn['test'], csn['validation']
     
@@ -43,8 +43,12 @@ if __name__ == '__main__':
     print('Loading test functions...', flush=True)
     functions_test = [_['func_code_string'] for _ in csn_test]
 
-    src_cfgs_test = SkeletonEncoder.from_single_functions_parallel(
-        functions=functions_test, verbose=True, n_processes=6,
+    #src_cfgs_test = SkeletonEncoder.from_single_functions_parallel(
+        #functions=functions_test, verbose=True, n_processes=6,
+    #)
+
+    src_cfgs_test = SkeletonEncoder.from_single_functions(
+        functions=functions_test, verbose=True
     )
 
     for src, cfg in src_cfgs_test:

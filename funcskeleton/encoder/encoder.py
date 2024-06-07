@@ -41,22 +41,23 @@ class SkeletonEncoder(ABC):
 
             # TODO: Handle errors.
             try: G = SkeletonEncoder.__get_cfg_timeout(src)
-            except TimeoutError:   timeout_errors += 1; continue
-            except ScalpelError:   scalpel_errors += 1; continue
-            except SyntaxError:    syntax_errors += 1; continue
+            except TimeoutError:   timeout_errors += 1  ; continue
+            except ScalpelError:   scalpel_errors += 1  ; continue
+            except SyntaxError:    syntax_errors += 1   ; continue
             except AssertionError: assertion_errors += 1; continue
-            except Exception:      other_errors += 1; continue
+            except Exception:      other_errors += 1    ; continue
             finally:               result.append((src, G.to_dict()))
 
         if verbose:
             errors = [syntax_errors, scalpel_errors, 
                  timeout_errors, assertion_errors,]
 
+            print('ERRORS SUMMARY:', flush=True)
             log_error(f'Syntax    errors: {errors[0]}.')
             log_error(f'Scalpel   errors: {errors[1]}.')
-            log_error(f'Timeout   errors: {errors[2]}.') # TODO: Why always 0 ? 
-            log_error(f'Assertion errors: {errors[3]}.')
-            log_error(f'Total: {sum(errors)}.')
+            log_error(f'Timeout   errors: {errors[2]}.')
+            log_error(f'Assertion errors: {errors[3]}.') # TODO: Where do they come from ?
+            log_error(f'TOTAL: {sum(errors)} not processed.')
 
         return result
 
@@ -226,7 +227,7 @@ class SkeletonEncoder(ABC):
 
         return can_process, can_not_process
 
-    @timeout_decorator.timeout(seconds=TIMEOUT_LIMIT_DEFAULT)
+    @timeout_decorator.timeout(seconds=TIMEOUT_LIMIT_DEFAULT, timeout_exception=TimeoutError)
     def __get_cfg_timeout(src): return Graph(src)
 
     @staticmethod

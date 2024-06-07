@@ -52,7 +52,7 @@ class SkeletonEncoder(ABC):
             errors = [syntax_errors, scalpel_errors, 
                  timeout_errors, assertion_errors,]
 
-            print('ERRORS SUMMARY:', flush=True)
+            print('\nERRORS SUMMARY:', flush=True)
             log_error(f'Syntax    errors: {errors[0]}.')
             log_error(f'Scalpel   errors: {errors[1]}.')
             log_error(f'Timeout   errors: {errors[2]}.')

@@ -3,13 +3,13 @@ Create a dataset of (src, cfg) of the entire CodeSearchNet dataset.
 It outputs 3 files corresponding to the 3 splits.
 """
 from datasets import load_dataset, Dataset
-import ast
+import ast, astenc
 
 # Package must be in the current working dir.
 from funcskeleton import SkeletonEncoder, SkeletonSerializer
 from funcskeleton.utils import n_params
 
-def sanity_check(_:dict):
+def filter(_:dict):
     function = _['func_code_string']
     A = SkeletonEncoder.function_sanity_check(function)
     B = '*' not in function # no *args or **kwargs
@@ -26,12 +26,12 @@ if __name__ == '__main__':
     print(f'Before(test):  {code_search_net["test"].num_rows}')
     print(f'Before(validation): {code_search_net["validation"].num_rows}')
 
-    code_search_net['train'] = code_search_net['train'].filter(lambda _: sanity_check(_))
-    code_search_net['test'] = code_search_net['test'].filter(lambda _: sanity_check(_))
-    code_search_net['validation'] = code_search_net['validation'].filter(lambda _: sanity_check(_))
+    code_search_net['train'] = code_search_net['train'].filter(lambda _: filter(_))
+    code_search_net['test']  = code_search_net['test'].filter(lambda _: filter(_))
+    code_search_net['validation'] = code_search_net['validation'].filter(lambda _: filter(_))
 
     print(f'After filtering (train): {code_search_net["train"].num_rows}')
-    print(f'After filtering (test): {code_search_net["test"].num_rows}')
+    print(f'After filtering (test):  {code_search_net["test"].num_rows}')
     print(f'After filtering (validation): {code_search_net["validation"].num_rows}')
 
     csn_train = code_search_net['train']
@@ -52,8 +52,9 @@ if __name__ == '__main__':
     for src, cfg in src_cfgs_test:
         tree    = ast.parse(src)
         nparams = n_params(tree)
-        cfg_str = SkeletonSerializer.serialize_function(cfg, nparams)
-        dataset['test'].append({'src':src, 'cfg':cfg_str})
+        cfg_str = SkeletonSerializer.serialize_function_separators_numbered(cfg, nparams)
+        ast_str = astenc.get_ast_nodes_dfs(tree)
+        dataset['test'].append({'src':src, 'cfg':cfg_str, 'ast':ast_str})
 
     ### VALIDATION
 
@@ -67,8 +68,9 @@ if __name__ == '__main__':
     for src, cfg in src_cfgs_val:
         tree    = ast.parse(src)
         nparams = n_params(tree)
-        cfg_str = SkeletonSerializer.serialize_function(cfg, nparams)
-        dataset['validation'].append({'src':src, 'cfg':cfg_str})
+        cfg_str = SkeletonSerializer.serialize_function_separators_numbered(cfg, nparams)
+        ast_str = astenc.get_ast_nodes_dfs(tree)
+        dataset['validation'].append({'src':src, 'cfg':cfg_str, 'ast':ast_str})
 
     ### TRAIN
 
@@ -82,8 +84,9 @@ if __name__ == '__main__':
     for src, cfg in src_cfgs_train:
         tree    = ast.parse(src)
         nparams = n_params(tree)
-        cfg_str = SkeletonSerializer.serialize_function(cfg, nparams)
-        dataset['train'].append({'src':src, 'cfg':cfg_str})
+        cfg_str = SkeletonSerializer.serialize_function_separators_numbered(cfg, nparams)
+        ast_str = astenc.get_ast_nodes_dfs(tree)
+        dataset['train'].append({'src':src, 'cfg':cfg_str, 'ast':ast_str})
 
     ### WRITE DATASET
 

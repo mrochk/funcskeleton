@@ -1,7 +1,15 @@
 # FuncSkeleton
 Generates the "skeleton" of a function for Machine Learning purposes.
 
-That is, for a given python (file | piece of source code) it will generate a dictionary in the form: 
+To install this package:
+```
+git clone 
+cd  funcskeleton
+pip install -r requirements.txt
+pip install .
+```
+
+For a given python (file | piece of source code) it will generate a dictionary in the form: 
 ```
 functions: [
     {

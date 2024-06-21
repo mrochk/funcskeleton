@@ -35,6 +35,35 @@ class SkeletonSerializer(ABC):
         return ret
 
     @staticmethod
+    def serialize_function_separators_numbered(function_dict:dict, nparams:int=None) -> str:
+        """
+        Takes a function dictionary produced by SkeletonEncoder, and returns a 
+        string in the form: `[n_params_func (if specified)][SEP1][ctrl_flow_block1]
+        ...[ctrl_flow_blockN][SEP2][relations_block1]...[relations_blockN][SEP3]
+        [n_calls_block1]...[n_class_blockN]`.
+        """
+        ret, blocks = '', function_dict['blocks']
+
+        if nparams is not None:
+            ret += f'[{nparams}][SEP1]'
+
+        for block in blocks:
+            ctrlflow = block['control_flow']
+            ret += f'[{ctrlflow}]'
+        ret += '[SEP2]'
+
+        for block in blocks:
+            relations = block['relations']
+            ret += str(relations).replace(' ', '')
+        ret += '[SEP3]'
+
+        for block in blocks:
+            calls = block['n_calls']
+            ret += f'[{calls}]'
+
+        return ret
+
+    @staticmethod
     def serialize_functions(function_dicts:list[dict], nparams:list[int]=None) -> list[str]:
         """
         Calls `serialize_function` on a list of function dicts, for `nparams`,

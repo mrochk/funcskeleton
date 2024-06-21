@@ -1,0 +1,4 @@
+python-scalpel
+setuptools==44.1.1
+termcolor==2.4.0
+timeout_decorator==0.5.0

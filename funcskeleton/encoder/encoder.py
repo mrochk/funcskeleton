@@ -1,19 +1,20 @@
-from abc import ABC
 import concurrent.futures
-import multiprocessing as mp
 import timeout_decorator
 import ast
+
+from abc import ABC
+from multiprocessing import current_process
 
 from ..cfg import Graph, ScalpelError
 from ..utils.utils import *
 
 N_PROCESSES_DEFAULT = 4
 
-TIMEOUT_LIMIT_DEFAULT = 10 #seconds
+TIMEOUT_LIMIT = 10#seconds
 
 class SkeletonEncoder(ABC):
     """
-    Abstract class implementing methods for converting source code
+    Class implementing methods for converting source code
     to a dictionary representing its Control Flow.
     """
     @staticmethod
@@ -24,7 +25,7 @@ class SkeletonEncoder(ABC):
         """
         result = []
 
-        process = mp.current_process().name.replace('Fork', '')
+        process = current_process().name.replace('Fork', '')
 
         total = len(srclist)
 
@@ -217,7 +218,7 @@ class SkeletonEncoder(ABC):
 
         return can_process, can_not_process
 
-    @timeout_decorator.timeout(seconds=TIMEOUT_LIMIT_DEFAULT, timeout_exception=TimeoutError)
+    @timeout_decorator.timeout(seconds=TIMEOUT_LIMIT, timeout_exception=TimeoutError)
     def __get_cfg_timeout(src): return Graph(src)
 
     @staticmethod

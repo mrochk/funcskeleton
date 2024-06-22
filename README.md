@@ -2,7 +2,7 @@
 Generate the "skeleton" of a function for Machine Learning purposes.
 
 To install this package, first clone this repository, then:
-```
+```bash
 cd  funcskeleton
 pip install -r requirements.txt
 pip install .

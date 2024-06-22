@@ -1,1 +1,1 @@
-from .encoder import SkeletonEncoder, TIMEOUT_LIMIT
+from .encoder import SkeletonEncoder

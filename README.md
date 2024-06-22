@@ -1,9 +1,8 @@
 # FuncSkeleton
-Generates the "skeleton" of a function for Machine Learning purposes.
+Generate the "skeleton" of a function for Machine Learning purposes.
 
-To install this package:
+To install this package, first clone this repository, then:
 ```
-git clone 
 cd  funcskeleton
 pip install -r requirements.txt
 pip install .
@@ -17,10 +16,10 @@ functions: [
         function1_containing_class: ...,
         function1_blocks: [
             {
-                function1_block1_identifier: ...
-                function1_block1_control_flow: ...
-                function1_block1_relations: ...
-                function1_block1_number_of_calls: ...
+                block1_identifier: ...
+                block1_control_flow: ...
+                block1_relations: ...
+                block1_number_of_calls: ...
             }, ...
             
         ]
@@ -30,7 +29,7 @@ functions: [
 ```
 Where the *blocks*, similarly as in a Control Flow Graph, give informations regarding each function flow of execution.
 
-This dictionary representation is what I call the list of *skeletons* of each function in the file.
+This dictionary representation is what we call the list of *skeletons* of each function in the file.
 
 ***This program does not support functions containing nested classes or functions.***\
 ***It will simply skip them.***
@@ -64,13 +63,10 @@ def function2(param):
 """
 
 control_flow_dicts = SkeletonEncoder.from_single_functions(
-    functions=[src1, src2], 
+    functions=[src1, src2]
 ) 
 
 serialized = SkeletonSerializer.serialize_functions(control_flow_dicts)
 
 for s in serialized: print(s)
-
-# [None][For][None][If][If][Return][Return];[1][2,3][1][4,5][6][][];[1][1][2][0][1][0][0]
-# [For][Return][If][None][None][Return];[1,2][][3,4][5][5][];[1][2][0][1][1][0]
 ```

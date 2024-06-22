@@ -1,6 +1,8 @@
 # FuncSkeleton
 Generate the "skeleton" of a function for Machine Learning purposes.
 
+It is based on [`scalpel`](https://github.com/SMAT-Lab/Scalpel).
+
 To install this package, first clone this repository, then:
 ```bash
 cd  funcskeleton

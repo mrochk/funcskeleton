@@ -1,7 +1,7 @@
 # FuncSkeleton
-Generate the "skeleton" of a function for Machine Learning purposes.
+Generate the CFG "skeleton" of a function for Machine Learning purposes.
 
-It is based on [`scalpel`](https://github.com/SMAT-Lab/Scalpel).
+This tool is based on [`scalpel`](https://github.com/SMAT-Lab/Scalpel).
 
 To install this package, first clone this repository, then:
 ```bash
@@ -10,18 +10,18 @@ pip install -r requirements.txt
 pip install .
 ```
 
-For a given python (file | piece of source code) it will generate a dictionary in the form: 
+For a given python input, it will generate a dictionary in the form: 
 ```
 functions: [
     {
-        function1_identifier: ...,
-        function1_containing_class: ...,
+        function1_name: ...,
+        function1_parent_class: ...,
         function1_blocks: [
             {
-                block1_identifier: ...
-                block1_control_flow: ...
+                block1_id: ...
+                block1_ctrl_flow: ...
                 block1_relations: ...
-                block1_number_of_calls: ...
+                block1_n_calls: ...
             }, ...
             
         ]
@@ -29,18 +29,16 @@ functions: [
 ]
 
 ```
-Where the *blocks*, similarly as in a Control Flow Graph, give informations regarding each function flow of execution.
+Where the *blocks*, as in the Control Flow Graph, give informations regarding each function flow of execution.
 
 This dictionary representation is what we call the list of *skeletons* of each function in the file.
 
-***This program does not support functions containing nested classes or functions.***\
-***It will simply skip them.***
+This program does not support functions containing nested classes or functions.\
+It will simply skip them.
 
 ## *Example:*
 ```python
-from funcskeleton import SkeletonEncoder, SkeletonSerializer
-
-src1 = """
+src = """
 def function1(param):
     print(param)
 
@@ -53,22 +51,15 @@ def function1(param):
     else: return 2
 """
 
-src2 = """
-def function2(param):
-    for i in range(100): 
-        return function1(i) + function2(i)
-    
-    if param: function1(param)
-    else: function2(param)
+from funcskeleton import SkeletonEncoder, SkeletonSerializer
 
-    return param
-"""
+_, enc = SkeletonEncoder.from_single_functions(functions=[src])[0]
 
-control_flow_dicts = SkeletonEncoder.from_single_functions(
-    functions=[src1, src2]
-) 
+result = SkeletonSerializer.serialize_function(enc)
 
-serialized = SkeletonSerializer.serialize_functions(control_flow_dicts)
+print(result)
 
-for s in serialized: print(s)
+# [None][For][None][If][If][Return][Return];[1][2,3][1][4,5][6][][];[1][1][2][0][1][0][0]
 ```
+
+Note: In https://huggingface.co/datasets/mrochk/src_ast_cfg, we use `SkeletonSerializer.serialize_function_separators_numbered`.
